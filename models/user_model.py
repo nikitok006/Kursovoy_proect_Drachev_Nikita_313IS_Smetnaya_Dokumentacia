@@ -10,3 +10,7 @@ class UserModel:
         cursor.execute("SELECT * FROM Users WHERE login=? AND password=?", (username, password))
         result = cursor.fetchone()
         return result is not None
+
+    def add_estimate(self):
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO ESTIMATE")
