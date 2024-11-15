@@ -1,0 +1,96 @@
+/* Основной фон и цвет текста */
+QMainWindow {
+    background-color: #1E3A5F; /* Темно-синий фон */
+    color: #E8F1FA; /* Светло-голубой текст */
+}
+
+/* Панели и вкладки */
+QTabWidget::pane {
+    background: #243B5E; /* Темный фон для панели вкладок */
+    border: 1px solid #1A6FBA;
+}
+QTabBar::tab {
+    background: #33547B; /* Темный цвет вкладки */
+    color: #E8F1FA;
+    padding: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+QTabBar::tab:selected {
+    background: #1A6FBA; /* Ярко-синий при выборе */
+    font-weight: bold;
+}
+
+/* Кнопки */
+QPushButton {
+    background-color: #1A6FBA; /* Ярко-синий */
+    color: #E8F1FA;
+    border: 1px solid #135A96;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+QPushButton:hover {
+    background-color: #135A96; /* Темный оттенок на наведение */
+}
+QPushButton:pressed {
+    background-color: #0F4775; /* Еще темнее при нажатии */
+}
+
+/* Поля ввода текста */
+QLineEdit, QTextEdit {
+    background-color: #2A4A73; /* Темно-синий фон */
+    color: #E8F1FA;
+    border: 1px solid #1A6FBA;
+    border-radius: 5px;
+    padding: 4px;
+}
+
+/* Многострочные текстовые поля */
+QTextEdit {
+    background-color: #243B5E;
+    color: #E8F1FA;
+    border: 1px solid #1A6FBA;
+    border-radius: 5px;
+}
+
+/* Выпадающие списки */
+QComboBox {
+    background-color: #243B5E;
+    color: #E8F1FA;
+    border: 1px solid #1A6FBA;
+    padding: 4px;
+    border-radius: 5px;
+}
+QComboBox::drop-down {
+    border-left: 1px solid #1A6FBA;
+    background-color: #1A6FBA;
+}
+
+/* Таблицы */
+QTableWidget {
+    background-color: #243B5E;
+    color: #E8F1FA;
+    gridline-color: #1A6FBA;
+    border: 1px solid #1A6FBA;
+}
+QHeaderView::section {
+    background-color: #33547B;
+    color: #E8F1FA;
+    padding: 4px;
+    border: 1px solid #1A6FBA;
+}
+
+/* Полоса прокрутки */
+QScrollBar:vertical, QScrollBar:horizontal {
+    background-color: #243B5E;
+    width: 12px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+    background-color: #1A6FBA;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
+    background-color: #135A96;
+}
