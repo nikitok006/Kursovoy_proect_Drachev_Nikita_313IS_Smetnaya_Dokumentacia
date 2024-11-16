@@ -18,7 +18,7 @@ class AuthController:
 
     def check_credentials(self, username, password):
         """Проверка учетных данных."""
-        if self.user_model.verify_user(username, password):
+        if self.user_model.login_user(username, password):
             self.login_view.close()
             self.main_view = EstimatorWindow()
             self.main_view.show()
