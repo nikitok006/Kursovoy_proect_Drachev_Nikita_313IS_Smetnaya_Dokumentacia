@@ -35,8 +35,8 @@ class EstimatorWindow(QMainWindow):
 
         # Таблица для отображения смет
         self.estimate_table = QTableWidget()
-        self.estimate_table.setColumnCount(3)
-        self.estimate_table.setHorizontalHeaderLabels(["Номер сметы", "Описание", "Статус"])
+        self.estimate_table.setColumnCount(6)
+        self.estimate_table.setHorizontalHeaderLabels(["Номер сметы", "Тип", "Название", "Статус", "Бюджет", "Дата"])
         main_layout.addWidget(self.estimate_table)
 
         # Добавление макета к центральному виджету

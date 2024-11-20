@@ -38,8 +38,8 @@ class CommentWindow(QMainWindow):
 
         # Таблица
         self.table = QTableWidget()
-        self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["Номер сметы", "Описание", "Статус"])
+        self.table.setColumnCount(6)
+        self.table.setHorizontalHeaderLabels(["Номер сметы", "Тип", "Название", "Статус", "Бюджет", "Дата"])
 
         # Основной компоновщик
         main_layout = QVBoxLayout()
