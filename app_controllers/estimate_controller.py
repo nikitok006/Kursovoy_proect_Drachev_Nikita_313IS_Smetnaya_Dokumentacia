@@ -1,5 +1,5 @@
 # from models.estimate_model import EstimateModel
-# from views.main_view import EstimateCreationWindow
+# from views.main_view import EstimatorWindow
 #
 # class EstimateController:
 #     def __init__(self):

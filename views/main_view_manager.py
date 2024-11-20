@@ -27,7 +27,7 @@ class CommentWindow(QMainWindow):
         button_layout = QHBoxLayout()
 
         self.comment_button = QPushButton("Оставить комментарий")
-        self.list_button = QPushButton("Список смет")
+        self.list_button = QPushButton("Выбрать проект")
         self.approved_button = QPushButton("Утвержденные сметы")
         self.report_button = QPushButton("Создать отчет")
 

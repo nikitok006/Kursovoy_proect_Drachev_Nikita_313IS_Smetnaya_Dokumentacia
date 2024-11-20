@@ -94,3 +94,20 @@ QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
 QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
     background-color: #135A96;
 }
+
+/* Устанавливаем цвет текста для меню */
+QMenuBar {
+    color: white;
+}
+
+/* Устанавливаем цвет текста для элементов меню */
+QMenu {
+    color: white;
+
+/* Общий стиль для QMessageBox */
+QMessageBox {
+
+    color: #white;           /* Белый текст */
+       /* Закруглённые углы */
+}
+
