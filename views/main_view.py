@@ -1,52 +1,11 @@
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QTableWidget, QTableWidgetItem, QLabel, QMenuBar,
-    QStatusBar, QLineEdit, QTextEdit, QMessageBox
-)
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QTableWidget, QMenuBar,
+    QStatusBar)
+
 from PySide6.QtGui import QAction
-from PySide6.QtCore import QSize, Qt
-
-
-class EstimateCreationWindow(QWidget):
-    """Окно для создания новой сметы."""
-
-    def __init__(self):
-        super().__init__()
-
-        # Настройка окна
-        self.setWindowTitle("Создание сметы")
-        self.setMinimumSize(QSize(400, 300))
-
-        # Макет и виджеты для ввода данных сметы
-        layout = QVBoxLayout()
-
-        # Поля для ввода данных сметы
-        self.estimate_number_input = QLineEdit()
-        self.estimate_number_input.setPlaceholderText("Введите номер сметы")
-
-        self.estimate_description_input = QTextEdit()
-        self.estimate_description_input.setPlaceholderText("Введите описание сметы")
-
-        # Кнопка для сохранения сметы
-        self.save_button = QPushButton("Сохранить смету")
-        self.save_button.clicked.connect(self.save_estimate)
-
-        # Добавление виджетов в макет
-        layout.addWidget(QLabel("Номер сметы:"))
-        layout.addWidget(self.estimate_number_input)
-        layout.addWidget(QLabel("Описание сметы:"))
-        layout.addWidget(self.estimate_description_input)
-        layout.addWidget(self.save_button)
-
-        # Установка макета в виджет
-        self.setLayout(layout)
-
-    def save_estimate(self):
-        """Обработчик для сохранения сметы."""
-        estimate_number = self.estimate_number_input.text()
-        estimate_description = self.estimate_description_input.toPlainText()
-        print(f"Сохранена смета №{estimate_number} с описанием: {estimate_description}")
-        # Дополнительная логика сохранения сметы, например, в базу данных или файл
+from PySide6.QtCore import QSize
+from views.estimate_create import CreateEstimateWindow
 
 
 class EstimatorWindow(QMainWindow):
@@ -125,7 +84,7 @@ class EstimatorWindow(QMainWindow):
     def open_estimate_creation_window(self):
         """Открывает окно для создания новой сметы."""
         self.status_bar.showMessage("Открытие окна создания сметы...")
-        self.estimate_creation_window = EstimateCreationWindow()
+        self.estimate_creation_window = CreateEstimateWindow()
         self.estimate_creation_window.show()
 
     # Обработчики других кнопок
