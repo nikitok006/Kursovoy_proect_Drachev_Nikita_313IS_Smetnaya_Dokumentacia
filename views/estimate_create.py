@@ -1,71 +1,74 @@
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QComboBox, QPushButton, QListWidget, QFormLayout, QSpinBox
+    QMainWindow, QVBoxLayout, QLabel, QLineEdit, QComboBox,QMessageBox, QPushButton, QListWidget, QAbstractItemView, QWidget
 )
-from PySide6.QtGui import QAction
-from PySide6.QtCore import QSize, Qt
+
 
 class CreateEstimateWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
+        self.controller = controller
+
         self.setWindowTitle("Создание сметы")
-        self.setGeometry(100, 100, 500, 400)
+        self.setGeometry(300, 300, 400, 400)
 
         # Центральный виджет
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
 
-        # Основной макет
-        self.layout = QVBoxLayout()
+        # Поле для ввода номера сметы
+        self.estimate_number_input = QLineEdit()
+        self.estimate_number_input.setPlaceholderText("Введите номер сметы")
+        layout.addWidget(QLabel("Номер сметы:"))
+        layout.addWidget(self.estimate_number_input)
 
-        # Поле для названия сметы
-        form_layout = QFormLayout()
-        self.estimate_name_input = QLineEdit()
-        form_layout.addRow("Название сметы:", self.estimate_name_input)
-
-        # Тип сметы
-        self.estimate_type_combo = QComboBox()
-        self.estimate_type_combo.addItems(["Локальная", "Объектная", "Сводная"])
-        form_layout.addRow("Тип сметы:", self.estimate_type_combo)
-
-        # Бюджет сметы
-        self.budget_input = QSpinBox()
-        self.budget_input.setMaximum(10_000_000)
-        self.budget_input.setPrefix("₽ ")
-        form_layout.addRow("Бюджет:", self.budget_input)
-
-        self.layout.addLayout(form_layout)
-
-        # Список материалов
-        self.materials_combo = QComboBox()
-        self.materials_combo.addItems(["Бетон", "Арматура", "Кирпич", "Песок", "Цемент"])
-        self.add_material_button = QPushButton("Добавить материал")
-        self.add_material_button.clicked.connect(self.add_material)  # Подключение кнопки
-
-        materials_layout = QHBoxLayout()
-        materials_layout.addWidget(self.materials_combo)
-        materials_layout.addWidget(self.add_material_button)
-
-        self.layout.addLayout(materials_layout)
-
-        # Выбранные материалы
+        # Список доступных материалов
         self.materials_list = QListWidget()
-        self.layout.addWidget(QLabel("Выбранные материалы:"))
-        self.layout.addWidget(self.materials_list)
+        self.materials_list.setSelectionMode(QAbstractItemView.MultiSelection)
+        layout.addWidget(QLabel("Выберите материалы:"))
+        layout.addWidget(self.materials_list)
 
-        # Кнопка сохранения
+        # Кнопка для сохранения сметы
         self.save_button = QPushButton("Сохранить смету")
-        # self.save_button.clicked.connect(self.save_estimate)
-        self.layout.addWidget(self.save_button, alignment=Qt.AlignmentFlag.AlignRight)
+        self.save_button.clicked.connect(self.save_estimate)
+        layout.addWidget(self.save_button)
 
-        # Установка макета
-        self.central_widget.setLayout(self.layout)
+        # Загрузка материалов
+        self.populate_materials()
 
-    def add_material(self):
-        """Добавить материал из выпадающего списка в список материалов."""
-        material = self.materials_combo.currentText()
-        if material not in [self.materials_list.item(i).text() for i in range(self.materials_list.count())]:
-            self.materials_list.addItem(material)
+    def populate_materials(self):
+        """
+        Заполняет список материалов.
+        """
+        materials = self.controller.get_materials()
+        for material in materials:
+            self.materials_list.addItem(f"{material['id']}: {material['name']}")
 
-        # Установка макета в виджет
-        self.setLayout(self.layout)
+    def save_estimate(self):
+        """
+        Сохраняет смету через контроллер.
+        """
+        estimate_number = self.estimate_number_input.text()
+        selected_items = self.materials_list.selectedItems()
+        selected_materials = [int(item.text().split(":")[0]) for item in selected_items]
+
+        if not estimate_number:
+            self.show_error("Пожалуйста, введите номер сметы.")
+            return
+
+        if not selected_materials:
+            self.show_error("Пожалуйста, выберите хотя бы один материал.")
+            return
+
+        self.controller.save_estimate(estimate_number, selected_materials)
+        self.close()
+
+    def show_error(self, message):
+        """
+        Показывает сообщение об ошибке.
+        """
+        error_dialog = QMessageBox()
+        error_dialog.setIcon(QMessageBox.Critical)
+        error_dialog.setWindowTitle("Ошибка")
+        error_dialog.setText(message)
+        error_dialog.exec()

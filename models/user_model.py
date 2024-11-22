@@ -25,7 +25,6 @@ class UserModel:
         cursor.execute("SELECT password FROM Users WHERE login = ?", (username,))
         user = cursor.fetchone()
         cursor.execute("SELECT role FROM Users WHERE login = ?", (username,))
-        role = cursor.fetchone()
         if user:
             stored_hash = user[0]  # Хэш пароля из базы
             # Проверяем введённый пароль
@@ -38,6 +37,8 @@ class UserModel:
 
         conn.close()
 
+    def get_username(self, username):
+            return username
 
     def role(self, username):
         conn = sqlite3.connect('database.db')

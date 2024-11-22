@@ -1,7 +1,10 @@
 from views.project_select_window import ProjectSelectionView
 
+
+
 class ProjectController:
-    def __init__(self, model):
+    def __init__(self, model, session):
+        self.session = session
         self.model = model
         self.view = ProjectSelectionView(self)
 
@@ -9,8 +12,8 @@ class ProjectController:
         """
         Отображает окно выбора проекта.
         """
-        print(23)
-        projects = self.model.get_all_projects()
+        print(self.session.get_current_user())
+        projects = self.model.get_all_projects(self.session.get_current_user())
         self.view.populate_projects(projects)
         self.view.show()
 
@@ -19,5 +22,5 @@ class ProjectController:
         Обрабатывает выбор проекта.
         :param project_id: ID выбранного проекта.
         """
-        print(f"Проект с ID {project_id} выбран.")
+        return project_id
         # Здесь можно добавить логику для перехода на другое окно
