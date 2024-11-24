@@ -18,6 +18,7 @@ class ProjectModel:
         cursor = connection.cursor()
         cursor.execute("SELECT id, name FROM Projects WHERE id_estimator = ? OR id_project_manager = ?", (username, username) )  # Таблица с проектами
         rows = cursor.fetchall()
+
         connection.close()
 
         return [{"id": row[0], "name": row[1]} for row in rows]

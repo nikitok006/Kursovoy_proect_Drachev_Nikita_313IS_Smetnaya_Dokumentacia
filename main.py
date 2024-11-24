@@ -26,13 +26,14 @@ if __name__ == "__main__":
     estimate_model = EstimateModel()
 
     # Инициализация контроллеров
-    project_controller = ProjectController(project_model, session)
-    estimate_controller = EstimateController(estimate_model)
+
+    estimate_controller = EstimateController(estimate_model, session)
+    project_controller = ProjectController(project_model, estimate_controller ,session)
     # Инициализация контроллера авторизации
     auth_controller = AuthController(project_controller, estimate_controller, session)
 
     # Создание главного окна
-    main_window = EstimatorWindow(project_controller, estimate_controller)
+    main_window = EstimatorWindow(project_controller, estimate_controller, session)
 
     # Привязка кнопок
     main_window.estimate_list_button.clicked.connect(project_controller.show_project_selection_window)

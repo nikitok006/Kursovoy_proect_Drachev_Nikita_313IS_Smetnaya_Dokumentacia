@@ -1,15 +1,18 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QVBoxLayout, QLabel, QLineEdit, QComboBox,QMessageBox, QPushButton, QListWidget, QAbstractItemView, QWidget
+    QMainWindow, QVBoxLayout, QLabel, QLineEdit, QTableWidget,QTableWidgetItem, QMessageBox, QPushButton, QListWidget, QAbstractItemView, QWidget
 )
+from PySide6.QtCore import Qt
 
 
 class CreateEstimateWindow(QMainWindow):
-    def __init__(self, controller):
+    def __init__(self, controller, session):
         super().__init__()
         self.controller = controller
+        self.session = session
+        print(f"Переданный контроллер: {self.controller}")
 
         self.setWindowTitle("Создание сметы")
-        self.setGeometry(300, 300, 400, 400)
+        self.setGeometry(300, 300, 600, 400)
 
         # Центральный виджет
         central_widget = QWidget()
@@ -22,11 +25,13 @@ class CreateEstimateWindow(QMainWindow):
         layout.addWidget(QLabel("Номер сметы:"))
         layout.addWidget(self.estimate_number_input)
 
-        # Список доступных материалов
-        self.materials_list = QListWidget()
-        self.materials_list.setSelectionMode(QAbstractItemView.MultiSelection)
-        layout.addWidget(QLabel("Выберите материалы:"))
-        layout.addWidget(self.materials_list)
+        # Таблица для отображения материалов и ввода количества
+        self.materials_table = QTableWidget()
+        self.materials_table.setColumnCount(5)
+        self.materials_table.setHorizontalHeaderLabels(["id", "Материал", "Ед. изм.", "Стоимость за единицу", "Количество"])
+        self.materials_table.horizontalHeader().setStretchLastSection(True)
+        layout.addWidget(QLabel("Материалы:"))
+        layout.addWidget(self.materials_table)
 
         # Кнопка для сохранения сметы
         self.save_button = QPushButton("Сохранить смету")
@@ -38,29 +43,66 @@ class CreateEstimateWindow(QMainWindow):
 
     def populate_materials(self):
         """
-        Заполняет список материалов.
+        Заполняет таблицу материалов.
         """
         materials = self.controller.get_materials()
-        for material in materials:
-            self.materials_list.addItem(f"{material['id']}: {material['name']}")
+        self.materials_table.setRowCount(len(materials))
+
+        for row, material in enumerate(materials):
+            # ID материала
+            id_item = QTableWidgetItem(str(material['id']))
+            id_item.setFlags(id_item.flags() ^ Qt.ItemIsEditable)  # ID нельзя редактировать
+            self.materials_table.setItem(row, 0, id_item)
+
+            # Название материала
+            name_item = QTableWidgetItem(material['name'])
+            name_item.setFlags(name_item.flags() ^ Qt.ItemIsEditable)  # Название нельзя редактировать
+            self.materials_table.setItem(row, 1, name_item)
+
+            # Единица измерения
+            unit_item = QTableWidgetItem(material['unit'])
+            unit_item.setFlags(unit_item.flags() ^ Qt.ItemIsEditable)  # Единица измерения тоже
+            self.materials_table.setItem(row, 2, unit_item)
+
+            cost = QTableWidgetItem(str(material['cost_per_unit']))
+            cost.setFlags(cost.flags() ^ Qt.ItemIsEditable)  # Единица измерения тоже
+            self.materials_table.setItem(row, 3, cost)
+
+            # Количество
+            quantity_item = QTableWidgetItem("0")
+            self.materials_table.setItem(row, 4, quantity_item)
 
     def save_estimate(self):
         """
         Сохраняет смету через контроллер.
         """
         estimate_number = self.estimate_number_input.text()
-        selected_items = self.materials_list.selectedItems()
-        selected_materials = [int(item.text().split(":")[0]) for item in selected_items]
-
         if not estimate_number:
             self.show_error("Пожалуйста, введите номер сметы.")
             return
 
-        if not selected_materials:
-            self.show_error("Пожалуйста, выберите хотя бы один материал.")
+        materials_with_quantity = []
+        for row in range(self.materials_table.rowCount()):
+            material_id = int(self.materials_table.item(row, 0).text())
+            quantity_text = self.materials_table.item(row, 3).text()
+
+            # Проверка корректности введенного количества
+            try:
+                quantity = float(quantity_text)
+                if quantity <= 0:
+                    continue  # Пропускаем материалы с нулевым или отрицательным количеством
+            except ValueError:
+                self.show_error(f"Некорректное количество для материала ID {material_id}.")
+                return
+
+            materials_with_quantity.append({"id": material_id, "quantity": quantity})
+
+        if not materials_with_quantity:
+            self.show_error("Пожалуйста, выберите хотя бы один материал с корректным количеством.")
             return
 
-        self.controller.save_estimate(estimate_number, selected_materials)
+        # Сохранение через контроллер
+        self.controller.save_estimate(estimate_number, materials_with_quantity, self.session)
         self.close()
 
     def show_error(self, message):
@@ -72,3 +114,4 @@ class CreateEstimateWindow(QMainWindow):
         error_dialog.setWindowTitle("Ошибка")
         error_dialog.setText(message)
         error_dialog.exec()
+

@@ -1,11 +1,15 @@
 from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QComboBox, QLabel, QPushButton, QWidget, QMessageBox
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
+
+from views.main_view import EstimatorWindow
 
 
 class ProjectSelectionView(QMainWindow):
-    def __init__(self, controller):
+
+    def __init__(self, controller, session):
         super().__init__()
         self.controller = controller
+        self.session = session
         self.setWindowTitle("Выбор проекта")
         self.setGeometry(300, 300, 400, 200)
 
@@ -45,7 +49,8 @@ class ProjectSelectionView(QMainWindow):
         """
         selected_id = self.project_combobox.currentData()
         if selected_id is not None:
-            QMessageBox.information(self, "Проект выбран", f"Вы выбрали проект с ID: {selected_id}")
-            self.controller.handle_project_selection(selected_id)
+            self.session.set_current_project(selected_id)  # Устанавливаем текущий проект
+            self.controller.estimates_table()  # Вызываем обновление таблицы
+            self.close()
         else:
-            QMessageBox.warning(self, "Ошибка", "Выберите проект из списка!")
+            QMessageBox.warning(self, "Ошибка", "Не выбран проект.")

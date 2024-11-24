@@ -1,12 +1,14 @@
 from views.project_select_window import ProjectSelectionView
-
+from views.main_view import EstimatorWindow
 
 
 class ProjectController:
-    def __init__(self, model, session):
+    def __init__(self, model, estimate_controller, session):
         self.session = session
         self.model = model
-        self.view = ProjectSelectionView(self)
+        self.view = ProjectSelectionView(self, session)
+        self.main = EstimatorWindow(self, estimate_controller, session)
+
 
     def show_project_selection_window(self):
         """
@@ -17,10 +19,14 @@ class ProjectController:
         self.view.populate_projects(projects)
         self.view.show()
 
-    def handle_project_selection(self, project_id):
+    def estimates_table(self):
         """
-        Обрабатывает выбор проекта.
-        :param project_id: ID выбранного проекта.
+        Обновляет таблицу смет в главном окне для указанного проекта.
         """
-        return project_id
-        # Здесь можно добавить логику для перехода на другое окно
+        self.main.update_estimates_table()
+
+
+
+
+
+

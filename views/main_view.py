@@ -11,8 +11,9 @@ from views.estimate_create import CreateEstimateWindow
 
 
 class EstimatorWindow(QMainWindow):
-    def __init__(self, project_controller, estimate_controller):
+    def __init__(self, project_controller, estimate_controller, session):
         super().__init__()
+        self.session = session
         self.project_controller = project_controller
         self.estimate_controller = estimate_controller
 
@@ -35,6 +36,10 @@ class EstimatorWindow(QMainWindow):
         self.create_estimate_button.clicked.connect(self.open_estimate_creation_window)
         action_layout.addWidget(self.create_estimate_button)
 
+        self.update_button = QPushButton("Обновить таблицу")
+        self.update_button.clicked.connect(self.update_estimates_table)
+        action_layout.addWidget(self.update_button)
+
         self.estimate_list_button = QPushButton("Выбрать проект")
         self.estimate_list_button.clicked.connect(project_controller.show_project_selection_window)
         action_layout.addWidget(self.estimate_list_button)
@@ -49,31 +54,43 @@ class EstimatorWindow(QMainWindow):
 
         # Таблица смет
         self.estimate_table = QTableWidget()
-        self.estimate_table.setColumnCount(6)
-        self.estimate_table.setHorizontalHeaderLabels(["Номер сметы", "Тип", "Название", "Статус", "Бюджет", "Дата"])
+        self.estimate_table.setColumnCount(4)  # Устанавливаем количество столбцов
+        self.estimate_table.setHorizontalHeaderLabels(
+            ["Номер сметы", "Итоговая сумма", "Дата составления", "Комментарий"])
         main_layout.addWidget(self.estimate_table)
 
         # Строка состояния
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
-
         central_widget.setLayout(main_layout)
+
 
         # Установка колбэка
         # self.estimate_controller.set_update_table_callback(self.update_estimates_table)
-        self.update_estimates_table()
+        # self.update_estimates_table()
 
     def update_estimates_table(self):
-        pass
-        # estimates = self.estimate_controller.get_all_estimates()
-        # self.estimate_table.setRowCount(len(estimates))
-        # for row, estimate in enumerate(estimates):
-        #     self.estimate_table.setItem(row, 0, QTableWidgetItem(str(estimate["estimate_number"])))
-        #     self.estimate_table.setItem(row, 1, QTableWidgetItem(estimate["type"]))
-        #     self.estimate_table.setItem(row, 2, QTableWidgetItem(estimate["name"]))
-        #     self.estimate_table.setItem(row, 3, QTableWidgetItem(estimate["status"]))
-        #     self.estimate_table.setItem(row, 4, QTableWidgetItem(str(estimate["budget"])))
-        #     self.estimate_table.setItem(row, 5, QTableWidgetItem(estimate["date"]))
+        # self.estimate_table.setRowCount(1)
+        # self.estimate_table.setItem(0, 0, QTableWidgetItem("Тестовая смета"))
+        # self.estimate_table.setItem(0, 1, QTableWidgetItem("10000"))
+        # self.estimate_table.setItem(0, 2, QTableWidgetItem("2024-11-24 15:00:00"))
+        # self.estimate_table.setItem(0, 3, QTableWidgetItem("Тестовый комментарий"))
+        """
+        # Обновляет таблицу смет для текущего проекта.
+        # """
+        current_project_id = self.session.get_current_project()
+        if current_project_id is not None:
+            estimates = self.estimate_controller.get_all_estimates()
+            print(estimates)
+            print(current_project_id)
+            self.estimate_table.clearContents()
+            self.estimate_table.setRowCount(len(estimates))  # Устанавливаем количество строк
+
+            for row, estimate in enumerate(estimates):
+                self.estimate_table.setItem(row, 0, QTableWidgetItem(str(estimate.get("estimate_number", ""))))
+                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate.get("total_cost", ""))))
+                self.estimate_table.setItem(row, 2, QTableWidgetItem(str(estimate.get("created_at", ""))))
+                self.estimate_table.setItem(row, 3, QTableWidgetItem(str(estimate.get("comment", ""))))
 
     def create_menu(self):
         menu_bar = QMenuBar(self)
@@ -86,6 +103,7 @@ class EstimatorWindow(QMainWindow):
     def open_estimate_creation_window(self):
         """Открывает окно для создания новой сметы."""
         self.status_bar.showMessage("Открытие окна создания сметы...")
-        self.estimate_creation_window = CreateEstimateWindow(self.estimate_controller)
+        self.estimate_creation_window = CreateEstimateWindow(self.estimate_controller, self.session)
         self.estimate_creation_window.show()
+
 
