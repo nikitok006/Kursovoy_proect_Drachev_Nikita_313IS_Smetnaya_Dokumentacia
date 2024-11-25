@@ -3,11 +3,11 @@ from views.main_view import EstimatorWindow
 
 
 class ProjectController:
-    def __init__(self, model, estimate_controller, session):
+    def __init__(self, model, estimate_controller, report_controller, session):
         self.session = session
         self.model = model
         self.view = ProjectSelectionView(self, session)
-        self.main = EstimatorWindow(self, estimate_controller, session)
+        self.main = EstimatorWindow(self, estimate_controller, report_controller, session)
 
 
     def show_project_selection_window(self):

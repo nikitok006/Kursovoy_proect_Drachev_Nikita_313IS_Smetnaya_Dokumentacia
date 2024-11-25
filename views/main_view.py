@@ -1,21 +1,24 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QTableWidget, QMenuBar,
-    QStatusBar, QTableWidgetItem)
+    QStatusBar, QTableWidgetItem, QMessageBox, QDialog)
 
 from PySide6.QtGui import QAction
 from PySide6.QtCore import QSize
+
+from views.Selected_estimate import SelectEstimateDialog
 from views.estimate_create import CreateEstimateWindow
 
 
 
 
 class EstimatorWindow(QMainWindow):
-    def __init__(self, project_controller, estimate_controller, session):
+    def __init__(self, project_controller, estimate_controller, report_controller, session):
         super().__init__()
         self.session = session
         self.project_controller = project_controller
         self.estimate_controller = estimate_controller
+        self.report_controller = report_controller
 
         # Настройка окна
         self.setWindowTitle("Система Сметного Документооборота")
@@ -48,6 +51,7 @@ class EstimatorWindow(QMainWindow):
         action_layout.addWidget(self.approved_estimates_button)
 
         self.create_report_button = QPushButton("Создать отчет")
+        self.create_report_button.clicked.connect(self.open_select_estimate_dialog)
         action_layout.addWidget(self.create_report_button)
 
         main_layout.addLayout(action_layout)
@@ -101,9 +105,21 @@ class EstimatorWindow(QMainWindow):
         self.setMenuBar(menu_bar)
 
     def open_estimate_creation_window(self):
-        """Открывает окно для создания новой сметы."""
-        self.status_bar.showMessage("Открытие окна создания сметы...")
-        self.estimate_creation_window = CreateEstimateWindow(self.estimate_controller, self.session)
-        self.estimate_creation_window.show()
+        if self.session.get_current_project() is not None:
+            """Открывает окно для создания новой сметы."""
+            self.status_bar.showMessage("Открытие окна создания сметы...")
+            self.estimate_creation_window = CreateEstimateWindow(self.estimate_controller, self.session)
+            self.estimate_creation_window.show()
+        else:
+            QMessageBox.warning(self, "Ошибка", "Не выбран проект.")
 
-
+    def open_select_estimate_dialog(self):
+        """
+        Открывает диалоговое окно выбора сметы для отчета.
+        """
+        dialog = SelectEstimateDialog(self.estimate_controller, self.session)
+        if dialog.exec() == QDialog.Accepted:
+            selected_estimate = dialog.selected_estimate
+            if selected_estimate:
+                print(f"Выбранная смета: {selected_estimate}")
+                self.report_controller.create_report_for_estimate(selected_estimate)

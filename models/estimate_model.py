@@ -47,6 +47,7 @@ class EstimateModel:
 
             # Текущая дата
             current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            print(current_date)
 
             # Сохраняем смету без total_cost
             print(f"Сохраняем смету: estimate_number={estimate_number}, project_id={project_id}")
@@ -139,6 +140,7 @@ class EstimateModel:
                         created_at = "Не указана"
 
                 results[estimate_id].update({
+                    "id": estimate_id,
                     "estimate_number": estimate_number,
                     "created_at": created_at,
                     "total_cost": total_cost if total_cost is not None else "Отсутствует",

@@ -2,7 +2,9 @@ import sys
 from PySide6.QtWidgets import QApplication
 from app_controllers.estimate_controller import EstimateController
 from app_controllers.auth_controller import AuthController
+from app_controllers.report_controller import ReportController
 from app_controllers.table_controller import ProjectController
+from models.report_model import ReportModel
 from models.table_projects_model import ProjectModel
 from models.estimate_model import EstimateModel
 from views.main_view import EstimatorWindow
@@ -24,16 +26,17 @@ if __name__ == "__main__":
     # Инициализация моделей
     project_model = ProjectModel()
     estimate_model = EstimateModel()
+    report_model = ReportModel()
 
     # Инициализация контроллеров
-
+    report_controller = ReportController(report_model, session)
     estimate_controller = EstimateController(estimate_model, session)
-    project_controller = ProjectController(project_model, estimate_controller ,session)
+    project_controller = ProjectController(project_model, estimate_controller , report_controller,session)
     # Инициализация контроллера авторизации
-    auth_controller = AuthController(project_controller, estimate_controller, session)
+    auth_controller = AuthController(project_controller, estimate_controller, report_controller, session)
 
     # Создание главного окна
-    main_window = EstimatorWindow(project_controller, estimate_controller, session)
+    main_window = EstimatorWindow(project_controller, estimate_controller, report_controller, session)
 
     # Привязка кнопок
     main_window.estimate_list_button.clicked.connect(project_controller.show_project_selection_window)

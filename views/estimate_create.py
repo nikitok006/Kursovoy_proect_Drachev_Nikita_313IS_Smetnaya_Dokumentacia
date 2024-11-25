@@ -27,8 +27,8 @@ class CreateEstimateWindow(QMainWindow):
 
         # Таблица для отображения материалов и ввода количества
         self.materials_table = QTableWidget()
-        self.materials_table.setColumnCount(5)
-        self.materials_table.setHorizontalHeaderLabels(["id", "Материал", "Ед. изм.", "Стоимость за единицу", "Количество"])
+        self.materials_table.setColumnCount(4)
+        self.materials_table.setHorizontalHeaderLabels([ "Материал", "Ед. изм.", "Стоимость за единицу", "Количество"])
         self.materials_table.horizontalHeader().setStretchLastSection(True)
         layout.addWidget(QLabel("Материалы:"))
         layout.addWidget(self.materials_table)
@@ -48,43 +48,46 @@ class CreateEstimateWindow(QMainWindow):
         materials = self.controller.get_materials()
         self.materials_table.setRowCount(len(materials))
 
+
         for row, material in enumerate(materials):
             # ID материала
-            id_item = QTableWidgetItem(str(material['id']))
-            id_item.setFlags(id_item.flags() ^ Qt.ItemIsEditable)  # ID нельзя редактировать
-            self.materials_table.setItem(row, 0, id_item)
+            id_item = material["id"]
+            # id_item.setFlags(id_item.flags() ^ Qt.ItemIsEditable)  # ID нельзя редактировать
+            # # self.materials_table.setItem(row, 0, id_item)
 
             # Название материала
             name_item = QTableWidgetItem(material['name'])
             name_item.setFlags(name_item.flags() ^ Qt.ItemIsEditable)  # Название нельзя редактировать
-            self.materials_table.setItem(row, 1, name_item)
+            self.materials_table.setItem(row, 0, name_item)
 
             # Единица измерения
             unit_item = QTableWidgetItem(material['unit'])
             unit_item.setFlags(unit_item.flags() ^ Qt.ItemIsEditable)  # Единица измерения тоже
-            self.materials_table.setItem(row, 2, unit_item)
+            self.materials_table.setItem(row, 1, unit_item)
 
             cost = QTableWidgetItem(str(material['cost_per_unit']))
             cost.setFlags(cost.flags() ^ Qt.ItemIsEditable)  # Единица измерения тоже
-            self.materials_table.setItem(row, 3, cost)
+            self.materials_table.setItem(row, 2, cost)
 
             # Количество
             quantity_item = QTableWidgetItem("0")
-            self.materials_table.setItem(row, 4, quantity_item)
+            self.materials_table.setItem(row, 3, quantity_item)
 
     def save_estimate(self):
         """
         Сохраняет смету через контроллер.
         """
+        materials = self.controller.get_materials()
         estimate_number = self.estimate_number_input.text()
         if not estimate_number:
             self.show_error("Пожалуйста, введите номер сметы.")
             return
 
         materials_with_quantity = []
-        for row in range(self.materials_table.rowCount()):
-            material_id = int(self.materials_table.item(row, 0).text())
+        for row, material in enumerate(materials):
+            material_id = material["id"]
             quantity_text = self.materials_table.item(row, 3).text()
+
 
             # Проверка корректности введенного количества
             try:
@@ -92,10 +95,10 @@ class CreateEstimateWindow(QMainWindow):
                 if quantity <= 0:
                     continue  # Пропускаем материалы с нулевым или отрицательным количеством
             except ValueError:
-                self.show_error(f"Некорректное количество для материала ID {material_id}.")
+                # self.show_error(f"Некорректное количество для материала ID {material_id}.")
                 return
 
-            materials_with_quantity.append({"id": material_id, "quantity": quantity})
+            materials_with_quantity.append({"id": material_id,"quantity": quantity})
 
         if not materials_with_quantity:
             self.show_error("Пожалуйста, выберите хотя бы один материал с корректным количеством.")

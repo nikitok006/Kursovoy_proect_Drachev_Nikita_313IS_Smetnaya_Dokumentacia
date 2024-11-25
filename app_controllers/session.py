@@ -2,7 +2,7 @@
 class Session:
     def __init__(self):
         self.current_user = None
-        self.current_project = 1
+        self.current_project = None
 
     def set_current_user(self, username):
         self.current_user = username
