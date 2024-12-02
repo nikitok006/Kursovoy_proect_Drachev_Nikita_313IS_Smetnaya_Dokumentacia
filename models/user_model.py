@@ -13,10 +13,8 @@ class UserModel:
 
     def verify_password(self, password, hashed_password):
         # Убедимся, что хэш в байтах
-        print(password, hashed_password)
         if isinstance(hashed_password, str):
             hashed_password = hashed_password.encode('utf-8')
-        print(password, hashed_password)
         return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
 
     def login_user(self, username, password):
@@ -26,6 +24,7 @@ class UserModel:
         # Ищем пользователя в базе данных
         cursor.execute("SELECT password FROM Users WHERE login = ?", (username,))
         user = cursor.fetchone()
+        cursor.execute("SELECT role FROM Users WHERE login = ?", (username,))
         if user:
             stored_hash = user[0]  # Хэш пароля из базы
             # Проверяем введённый пароль
@@ -38,6 +37,15 @@ class UserModel:
 
         conn.close()
 
-    # def add_estimate(self):
-    #     cursor = self.connection.cursor()
-    #     cursor.execute("INSERT INTO ESTIMATE")
+    def get_username(self, username):
+            return username
+
+    def role(self, username):
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT role FROM Users WHERE login = ?", (username,))
+        role = cursor.fetchone()
+        if role == ('сметчик',):
+            return 1
+        else:
+            return 0
