@@ -14,7 +14,7 @@ class AuthController:
         self.controller = controller
         self.estimate_controller = estimate_controller
         self.session = session
-        self.project_selection_window = ProjectSelectionView(self, self.session)
+        # self.project_selection_window = ProjectSelectionView(self, self.session)
         self.report_controller = report_controller
 
         # Подключаем сигнал авторизации к методу проверки
@@ -33,7 +33,7 @@ class AuthController:
                 self.main_view = EstimatorWindow(self.controller, self.estimate_controller, self.report_controller, self.session)
                 self.main_view.show()
             else:
-                self.main_view = CommentWindow(self.controller, self.estimate_controller, self.session)
+                self.main_view = CommentWindow(self.controller, self.estimate_controller, self.report_controller, self.session)
                 self.main_view.show()
         else:
             self.login_view.show_error("Неверный логин или пароль")

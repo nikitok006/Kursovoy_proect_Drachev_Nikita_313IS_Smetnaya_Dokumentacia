@@ -1,6 +1,8 @@
 import sqlite3
 from  collections import defaultdict
 from datetime import datetime
+from dbm import error
+
 from  app_controllers.session import Session
 
 class EstimateModel:
@@ -132,13 +134,6 @@ class EstimateModel:
             })
 
             for estimate_id, estimate_number, created_at, total_cost, comment in rows:
-                # Преобразуем created_at в читаемый формат
-                if created_at:
-                    try:
-                        created_at = datetime.fromtimestamp(float(created_at)).strftime('%Y-%m-%d %H:%M:%S')
-                    except (ValueError, TypeError):
-                        created_at = "Не указана"
-
                 results[estimate_id].update({
                     "id": estimate_id,
                     "estimate_number": estimate_number,
@@ -155,3 +150,103 @@ class EstimateModel:
             return final_results
         finally:
             conn.close()
+
+    def get_materials_for_estimate(self, estimate_number):
+        """Возвращает материалы для указанной сметы."""
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                   SELECT m.name, er.quantity, m.cost_per_unit
+                   FROM Estimate_resources er
+                   JOIN resources m ON er.resource_id = m.id
+                   WHERE er.estimate_id = (
+                       SELECT id FROM Estimates WHERE estimate_number = ?
+                   )
+               """, (estimate_number,))
+            return [
+                {"name": row[0], "quantity": row[1], "cost_per_unit": row[2]}
+                for row in cursor.fetchall()
+            ]
+        finally:
+            conn.close()
+
+    def update_estimate(self, estimate_number, materials):
+            """Обновляет материалы в смете и пересчитывает total_cost."""
+            conn = sqlite3.connect(self.db_path)
+            try:
+                cursor = conn.cursor()
+
+                # Получаем ID сметы
+                cursor.execute("SELECT id FROM Estimates WHERE estimate_number = ?", (estimate_number,))
+                estimate_id = cursor.fetchone()[0]
+
+                # Обновляем материалы
+                total_cost = 0  # Суммарная стоимость сметы
+                for material in materials:
+                    # Проверяем, связан ли материал уже со сметой
+                    cursor.execute("""
+                           SELECT 1 FROM Estimate_resources
+                           WHERE estimate_id = ? AND resource_id = (
+                               SELECT id FROM resources WHERE name = ?
+                           )
+                       """, (estimate_id, material["name"]))
+
+                    if cursor.fetchone():  # Если материал уже связан
+                        cursor.execute("""
+                               UPDATE Estimate_resources
+                               SET quantity = ?
+                               WHERE estimate_id = ? AND resource_id = (
+                                   SELECT id FROM resources WHERE name = ?
+                               )
+                           """, (material["quantity"], estimate_id, material["name"]))
+                    else:  # Если материал не связан, добавляем его
+                        cursor.execute("""
+                               INSERT INTO Estimate_resources (estimate_id, resource_id, quantity)
+                               VALUES (
+                                   ?, 
+                                   (SELECT id FROM resources WHERE name = ?), 
+                                   ?
+                               )
+                           """, (estimate_id, material["name"], material["quantity"]))
+
+                    # Добавляем стоимость материала к total_cost
+                    total_cost += material["quantity"] * material["cost_per_unit"]
+
+                # Обновляем total_cost в таблице Estimates
+                cursor.execute("""
+                       UPDATE Estimates
+                       SET total_cost = ?
+                       WHERE id = ?
+                   """, (total_cost, estimate_id))
+
+                conn.commit()
+            finally:
+                conn.close()
+
+    def get_estimates(self, project_id):
+        connection = sqlite3.connect(self.db_path)
+        cursor = connection.cursor()
+        cursor.execute("SELECT estimate_number, created_at  FROM Estimates WHERE project_id = ? ",
+                       (project_id,))  # Таблица с проектами
+        rows = cursor.fetchall()
+
+        connection.close()
+        print([{"id": row[0], "name": row[1]} for row in rows])
+        return [{"id": row[0], "name": row[1]} for row in rows]
+
+    def add_comment(self, estimate_number, comment):
+        """Обновляет комментарий в базе данных для указанной сметы."""
+        print(estimate_number)
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                   UPDATE Estimates
+                   SET comment = ?
+                   WHERE estimate_number = ?
+               """, (comment, estimate_number))
+            conn.commit()
+        finally:
+            conn.close()
+

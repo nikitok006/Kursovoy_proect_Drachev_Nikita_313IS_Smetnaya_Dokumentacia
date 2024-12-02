@@ -1,15 +1,15 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QTableWidget, QMenuBar,
-    QStatusBar, QTableWidgetItem, QMessageBox, QDialog)
+    QStatusBar, QTableWidgetItem, QMessageBox, QDialog, QMenu)
 
 from PySide6.QtGui import QAction
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 
 from views.Selected_estimate import SelectEstimateDialog
 from views.estimate_create import CreateEstimateWindow
-
-
+from views.project_select_window import ProjectSelectionView
+from views.edit_estimate_dialog import EditEstimateDialog
 
 
 class EstimatorWindow(QMainWindow):
@@ -39,16 +39,9 @@ class EstimatorWindow(QMainWindow):
         self.create_estimate_button.clicked.connect(self.open_estimate_creation_window)
         action_layout.addWidget(self.create_estimate_button)
 
-        self.update_button = QPushButton("Обновить таблицу")
-        self.update_button.clicked.connect(self.update_estimates_table)
-        action_layout.addWidget(self.update_button)
-
         self.estimate_list_button = QPushButton("Выбрать проект")
-        self.estimate_list_button.clicked.connect(project_controller.show_project_selection_window)
+        self.estimate_list_button.clicked.connect(self.open_project_selection)
         action_layout.addWidget(self.estimate_list_button)
-
-        self.approved_estimates_button = QPushButton("Утвержденные сметы")
-        action_layout.addWidget(self.approved_estimates_button)
 
         self.create_report_button = QPushButton("Создать отчет")
         self.create_report_button.clicked.connect(self.open_select_estimate_dialog)
@@ -61,6 +54,9 @@ class EstimatorWindow(QMainWindow):
         self.estimate_table.setColumnCount(4)  # Устанавливаем количество столбцов
         self.estimate_table.setHorizontalHeaderLabels(
             ["Номер сметы", "Итоговая сумма", "Дата составления", "Комментарий"])
+        self.estimate_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.estimate_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.estimate_table.customContextMenuRequested.connect(self.show_context_menu)
         main_layout.addWidget(self.estimate_table)
 
         # Строка состояния
@@ -87,6 +83,7 @@ class EstimatorWindow(QMainWindow):
             estimates = self.estimate_controller.get_all_estimates()
             print(estimates)
             print(current_project_id)
+            print(0)
             self.estimate_table.clearContents()
             self.estimate_table.setRowCount(len(estimates))  # Устанавливаем количество строк
 
@@ -95,6 +92,8 @@ class EstimatorWindow(QMainWindow):
                 self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate.get("total_cost", ""))))
                 self.estimate_table.setItem(row, 2, QTableWidgetItem(str(estimate.get("created_at", ""))))
                 self.estimate_table.setItem(row, 3, QTableWidgetItem(str(estimate.get("comment", ""))))
+            self.estimate_table.resizeColumnsToContents()
+
 
     def create_menu(self):
         menu_bar = QMenuBar(self)
@@ -108,7 +107,7 @@ class EstimatorWindow(QMainWindow):
         if self.session.get_current_project() is not None:
             """Открывает окно для создания новой сметы."""
             self.status_bar.showMessage("Открытие окна создания сметы...")
-            self.estimate_creation_window = CreateEstimateWindow(self.estimate_controller, self.session)
+            self.estimate_creation_window = CreateEstimateWindow(self.estimate_controller, self.session, self.update_estimates_table)
             self.estimate_creation_window.show()
         else:
             QMessageBox.warning(self, "Ошибка", "Не выбран проект.")
@@ -117,9 +116,39 @@ class EstimatorWindow(QMainWindow):
         """
         Открывает диалоговое окно выбора сметы для отчета.
         """
-        dialog = SelectEstimateDialog(self.estimate_controller, self.session)
-        if dialog.exec() == QDialog.Accepted:
-            selected_estimate = dialog.selected_estimate
-            if selected_estimate:
-                print(f"Выбранная смета: {selected_estimate}")
-                self.report_controller.create_report_for_estimate(selected_estimate)
+        if self.session.get_current_project() is not None:
+            dialog = SelectEstimateDialog(self.estimate_controller, self.session)
+            if dialog.exec() == QDialog.Accepted:
+                selected_estimate = dialog.selected_estimate
+                if selected_estimate:
+                    print(f"Выбранная смета: {selected_estimate}")
+                    self.report_controller.create_report_for_estimate(selected_estimate)
+        else:
+            QMessageBox.warning(self, "Ошибка", "Не выбран проект.")
+
+
+    def open_project_selection(self):
+        #Открывает окно выбора проекта.
+        dialog = ProjectSelectionView(
+            self.project_controller,
+            self.session,
+            self.update_estimates_table  # Передаём метод как колбэк
+        )
+        dialog.exec()
+
+    def show_context_menu(self, position):
+        """Отображает контекстное меню при клике правой кнопкой."""
+        menu = QMenu()
+        edit_action = menu.addAction("Изменить")
+        action = menu.exec(self.estimate_table.viewport().mapToGlobal(position))
+        if action == edit_action:
+            selected_row = self.estimate_table.currentRow()
+            if selected_row >= 0:
+                estimate_number = self.estimate_table.item(selected_row, 0).text()
+                self.open_edit_estimate_dialog(estimate_number)
+
+    def open_edit_estimate_dialog(self, estimate_number):
+        """Открывает диалог для редактирования выбранной сметы."""
+        dialog = EditEstimateDialog(self.estimate_controller, estimate_number)
+        dialog.exec_()
+        self.update_estimates_table()  # Обновляем таблицу после редактирования

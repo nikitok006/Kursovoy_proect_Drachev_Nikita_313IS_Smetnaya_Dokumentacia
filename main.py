@@ -39,7 +39,7 @@ if __name__ == "__main__":
     main_window = EstimatorWindow(project_controller, estimate_controller, report_controller, session)
 
     # Привязка кнопок
-    main_window.estimate_list_button.clicked.connect(project_controller.show_project_selection_window)
+    # main_window.estimate_list_button.clicked.connect(project_controller/.)
 
     # Устанавливаем колбэк для обновления таблицы
     estimate_controller.set_update_table_callback(main_window.update_estimates_table)

@@ -39,21 +39,20 @@ class SelectEstimateDialog(QDialog):
         Заполняет таблицу смет данными из контроллера.
         """
         current_project_id = self.session.get_current_project()
-        if current_project_id is None:
+        if current_project_id is  not None:
+            estimates = self.estimate_controller.get_all_estimates(current_project_id)
+            self.estimate_table.setRowCount(len(estimates))
+            for row, estimate in enumerate(estimates):
+                id_item = QTableWidgetItem()
+                id_item.setData(Qt.UserRole, estimate["id"])  # Сохраняем ID сметы
+                id_item.setText(str(estimate["estimate_number"]))  # Отображаем номер сметы
+                self.estimate_table.setItem(row, 0, id_item)
+                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate["total_cost"])))
+                self.estimate_table.setItem(row, 2, QTableWidgetItem(estimate["comment"]))
+
+        else:
             QMessageBox.warning(self, "Ошибка", "Проект не выбран.")
             self.reject()
-            return
-
-        estimates = self.estimate_controller.get_all_estimates(current_project_id)
-        self.estimate_table.setRowCount(len(estimates))
-
-        for row, estimate in enumerate(estimates):
-            id_item = QTableWidgetItem()
-            id_item.setData(Qt.UserRole, estimate["id"])  # Сохраняем ID сметы
-            id_item.setText(str(estimate["estimate_number"]))  # Отображаем номер сметы
-            self.estimate_table.setItem(row, 0, id_item)
-            self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate["total_cost"])))
-            self.estimate_table.setItem(row, 2, QTableWidgetItem(estimate["comment"]))
 
     def select_estimate(self):
         """

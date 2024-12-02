@@ -6,24 +6,23 @@ class ProjectController:
     def __init__(self, model, estimate_controller, report_controller, session):
         self.session = session
         self.model = model
-        self.view = ProjectSelectionView(self, session)
         self.main = EstimatorWindow(self, estimate_controller, report_controller, session)
 
 
-    def show_project_selection_window(self):
+    def get_all_projects(self):
         """
         Отображает окно выбора проекта.
         """
         print(self.session.get_current_user())
-        projects = self.model.get_all_projects(self.session.get_current_user())
-        self.view.populate_projects(projects)
-        self.view.show()
+        return self.model.get_all_projects(self.session.get_current_user())
+
 
     def estimates_table(self):
         """
         Обновляет таблицу смет в главном окне для указанного проекта.
         """
-        self.main.update_estimates_table()
+        print("обновляем")
+        return  self.main.update_estimates_table()
 
 
 

@@ -5,10 +5,11 @@ from PySide6.QtCore import Qt
 
 
 class CreateEstimateWindow(QMainWindow):
-    def __init__(self, controller, session):
+    def __init__(self, controller, session, update_table_callback):
         super().__init__()
         self.controller = controller
         self.session = session
+        self.update_table_callback = update_table_callback
         print(f"Переданный контроллер: {self.controller}")
 
         self.setWindowTitle("Создание сметы")
@@ -106,6 +107,7 @@ class CreateEstimateWindow(QMainWindow):
 
         # Сохранение через контроллер
         self.controller.save_estimate(estimate_number, materials_with_quantity, self.session)
+        self.update_table_callback()
         self.close()
 
     def show_error(self, message):

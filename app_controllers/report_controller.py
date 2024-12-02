@@ -49,7 +49,7 @@ class ReportController:
         pdf.setFont("DejaVu", 10)
         pdf.drawString(x, y, f"Общая стоимость: {estimate['total_cost']} руб.")
         y -= line_height
-        pdf.drawString(x, y, f"Комментарий: {estimate['comment']}")
+        # pdf.drawString(x, y, f"Комментарий: {estimate['comment']}")
         y -= line_height * 2
 
         # Заголовок для материалов
@@ -87,7 +87,6 @@ class ReportController:
             # Отображаем таблицу
             table.wrapOn(pdf, x, y)  # Устанавливаем положение
             table.drawOn(pdf, x, y - len(table_data) * line_height)
-
         pdf.save()
         print(f"Отчет сохранен в {output_file}")
 
