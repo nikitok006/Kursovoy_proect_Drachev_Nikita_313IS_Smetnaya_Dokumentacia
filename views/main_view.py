@@ -64,17 +64,7 @@ class EstimatorWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
         central_widget.setLayout(main_layout)
 
-
-        # Установка колбэка
-        # self.estimate_controller.set_update_table_callback(self.update_estimates_table)
-        # self.update_estimates_table()
-
     def update_estimates_table(self):
-        # self.estimate_table.setRowCount(1)
-        # self.estimate_table.setItem(0, 0, QTableWidgetItem("Тестовая смета"))
-        # self.estimate_table.setItem(0, 1, QTableWidgetItem("10000"))
-        # self.estimate_table.setItem(0, 2, QTableWidgetItem("2024-11-24 15:00:00"))
-        # self.estimate_table.setItem(0, 3, QTableWidgetItem("Тестовый комментарий"))
         """
         # Обновляет таблицу смет для текущего проекта.
         # """
@@ -89,7 +79,10 @@ class EstimatorWindow(QMainWindow):
 
             for row, estimate in enumerate(estimates):
                 self.estimate_table.setItem(row, 0, QTableWidgetItem(str(estimate.get("estimate_number", ""))))
-                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate.get("total_cost", ""))))
+                total_cost = estimate.get("total_cost", "")
+                if total_cost:
+                    total_cost = f"{total_cost}0 ₽"
+                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(total_cost)))
                 self.estimate_table.setItem(row, 2, QTableWidgetItem(str(estimate.get("created_at", ""))))
                 self.estimate_table.setItem(row, 3, QTableWidgetItem(str(estimate.get("comment", ""))))
             self.estimate_table.resizeColumnsToContents()

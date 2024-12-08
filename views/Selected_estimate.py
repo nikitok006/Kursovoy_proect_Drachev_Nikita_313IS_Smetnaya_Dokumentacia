@@ -47,7 +47,10 @@ class SelectEstimateDialog(QDialog):
                 id_item.setData(Qt.UserRole, estimate["id"])  # Сохраняем ID сметы
                 id_item.setText(str(estimate["estimate_number"]))  # Отображаем номер сметы
                 self.estimate_table.setItem(row, 0, id_item)
-                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate["total_cost"])))
+                total_cost = estimate.get("total_cost", "")
+                if total_cost:
+                    total_cost = f"{total_cost}0 ₽"
+                self.estimate_table.setItem(row, 1, QTableWidgetItem(total_cost))
                 self.estimate_table.setItem(row, 2, QTableWidgetItem(estimate["comment"]))
 
         else:

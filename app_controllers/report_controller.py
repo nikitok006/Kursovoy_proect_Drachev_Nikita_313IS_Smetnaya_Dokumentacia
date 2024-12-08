@@ -47,7 +47,7 @@ class ReportController:
         pdf.drawString(x, y, f"Смета № {estimate['estimate_number']}")
         y -= line_height
         pdf.setFont("DejaVu", 10)
-        pdf.drawString(x, y, f"Общая стоимость: {estimate['total_cost']} руб.")
+        pdf.drawString(x, y, f"Общая стоимость: {estimate['total_cost']}0 руб.")
         y -= line_height
         # pdf.drawString(x, y, f"Комментарий: {estimate['comment']}")
         y -= line_height * 2
@@ -67,8 +67,8 @@ class ReportController:
                 table_data.append([
                     material["material_name"],
                     f"{material['quantity']}",
-                    f"{material['cost_per_unit']} руб.",
-                    f"{material['total_cost']} руб."
+                    f"{material['cost_per_unit']}0 руб.",
+                    f"{material['total_cost']}0 руб."
                 ])
 
             # Создаём таблицу

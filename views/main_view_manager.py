@@ -83,7 +83,10 @@ class CommentWindow(QMainWindow):
 
             for row, estimate in enumerate(estimates):
                 self.estimate_table.setItem(row, 0, QTableWidgetItem(str(estimate.get("estimate_number", ""))))
-                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(estimate.get("total_cost", ""))))
+                total_cost = estimate.get("total_cost", "")
+                if total_cost:
+                    total_cost = f"{total_cost}0 ₽"
+                self.estimate_table.setItem(row, 1, QTableWidgetItem(str(total_cost)))
                 self.estimate_table.setItem(row, 2, QTableWidgetItem(str(estimate.get("created_at", ""))))
                 self.estimate_table.setItem(row, 3, QTableWidgetItem(str(estimate.get("comment", ""))))
 

@@ -66,7 +66,7 @@ class CreateEstimateWindow(QMainWindow):
             unit_item.setFlags(unit_item.flags() ^ Qt.ItemIsEditable)  # Единица измерения тоже
             self.materials_table.setItem(row, 1, unit_item)
 
-            cost = QTableWidgetItem(str(material['cost_per_unit']))
+            cost = QTableWidgetItem(str(material['cost_per_unit']) + "0 ₽")
             cost.setFlags(cost.flags() ^ Qt.ItemIsEditable)  # Единица измерения тоже
             self.materials_table.setItem(row, 2, cost)
 
