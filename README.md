@@ -23,5 +23,5 @@
    ```
 6. Запустите файл
    ```PowerShell
-   python mainwindow.py
+   python main.py
    ```
